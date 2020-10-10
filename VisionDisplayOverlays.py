@@ -12,9 +12,14 @@ import string
 from PIL import Image, ImageDraw, ImageFont
 import json
 
+#changing variables based on raspi
+path = '/media/usb/' #usb path to save files
+serialPiPort = '/dev/ttyUSB0' 
+imagePath = "/media/usb/" # images path on pi
+
 #setup display variables
 screenX =  int(800)
-screenY =  int(480)
+screenY =  int(480) #camera is also recording at this res
 screenFramrate = 30
 linegap = int(0.04 * screenY)
 linewidth = int(0.01 * screenY)
@@ -23,10 +28,10 @@ lineextra = int(0.05 * screenY)
 barcolor = (26, 255, 26,230)
 slidercolor = (153,102,255,230)
 background = (0,0,0,80)
-path = '/media/usb/' #black usb
 yawRange = int(90)
 pitchRange = int(30)
 buttonpin = 2
+
 
 #initial data values (pre serial)
 DataToDisplay = {'yaw':20, 'pitch':10, 'rpm':'100', 'speed':'2','depth':'2.5','battery':True}
@@ -41,7 +46,7 @@ camera.clock_mode='reset'
 
 #serial setup
 ser=serial.Serial(
-    port='/dev/ttyUSB0',
+    port=serialPiPort,
     baudrate = 9600,
 #    parity=serial.PARITY_NONE,
 #    stopbits=serial.STOPBITS_ONE,
@@ -63,13 +68,13 @@ datafont = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSansBold.t
 smalltextfont = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",8)
 
 #creaitng images for indicators
-WarningIM = Image.open("/media/usb/warning.png")
+WarningIM = Image.open(imagePath+"warning.png")
 WarningIM = WarningIM.resize([linegap*2,linegap*2])
-BatteryIM = Image.open("/media/usb/lowbatt.png")
+BatteryIM = Image.open(imagePath+"lowbatt.png")
 BatteryIM = BatteryIM.resize([linegap*2,linegap*2])
-RaceIM = Image.open("/media/usb/sub.png")
+RaceIM = Image.open(imagePath + "sub.png")
 RaceIM = RaceIM.resize([linegap*2,linegap*2])
-lightsIM = Image.open("/media/usb/highbeams.png")
+lightsIM = Image.open(imagePath+"highbeams.png")
 lightsIM = lightsIM.resize([linegap*2,linegap*2])
 
 #creating stationary image for bars and backgroungs
@@ -169,23 +174,5 @@ while True:
     #check status on of the button
     SwitchStatus(DataToButton)
     SerielOverlay()
-    #sleep(1)
-#    if DataToButton['status']==motors:
-#        timetext= camera.timestamp - DataToButton['time']
-#    
-#        minutes = timetext /(60*10**6)
-#        seconds = (timetext % (60*10**6)) /(10**6)
-#        timestamptext = str(int(minutes)) + ':' + str(int(seconds)) 
-#        
-#        timeIM = blankcanvas.copy()
-#        draw = ImageDraw.Draw(timeIM)
-#        draw.text([screenX*0.9,screenY-linegap*1], timestamptext, front = datafont, fill=slidercolor)
-#        timeoverlay.update(timeIM.tobytes())   
-#    
-#    else:
-#        timetext = camera.timestamp
-#        timeIM = blankcanvas.copy()
-#        timeoverlay.update(timeIM.tobytes())  
 
-#finally:
-#    pause()
+
