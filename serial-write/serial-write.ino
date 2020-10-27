@@ -30,5 +30,5 @@ void loop() {
   root["battery"] = true;
  
   root.printTo(Serial);
-  delay(1000);
+  /*delay(1000);*/
 }

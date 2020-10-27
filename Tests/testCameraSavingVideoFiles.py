@@ -34,7 +34,7 @@ def camera_record_once(num):
 
 
 create_directory()
-for x in range(RECORD_DURATION):
+for x in range(LOOP_AMOUNT):
     camera_record_once(x)
 
 
