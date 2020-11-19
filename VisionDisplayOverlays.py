@@ -12,6 +12,7 @@ import string
 from PIL import Image, ImageDraw, ImageFont
 import json
 
+
 #changing variables based on raspi
 path = '/media/usb/' #usb path to save files
 serialPiPort = '/dev/ttyUSB0' 
@@ -102,13 +103,21 @@ movingIM = blankcanvas.copy()
 indicatorsIM = blankcanvas.copy()
 timeIM = blankcanvas.copy()
 
-def SwitchStatus(DataToButton):
+#Start Show
+camera.start_preview()
+#adding stationary and initial status overlays
+stationaryoverlay = camera.add_overlay(pitchYawAxisIM.tobytes(),layer=3) 
+movingoverlay = camera.add_overlay(movingIM.tobytes(),layer = 4)    
+indicatorsoverlay = camera.add_overlay(indicatorsIM.tobytes(), layer=4)
+timeoverlay = camera.add_overlay(timeIM.tobytes(), layer=4)
+
+def SwitchStatus():
     # switches between recording and motors on status to idle and lights on status
     # while status is motors than it also starts the recording and stops it in lights
     # updates the overlay to add the icon to display the correct status
     lights = True
     motors = False
-    
+    global DataToButton
     if statusbutton.is_pressed:
         indicatorsIM = blankcanvas.copy()
         if DataToButton['status'] == lights:
@@ -132,12 +141,15 @@ def SwitchStatus(DataToButton):
             camera.led=True
             #clear the timestamp
             DataToButton['time']=int(camera.timestamp)
-            
+          
         #update overlay
-        indicatorsoverlay.update(indicatorsIM.tobytes())
+        global indicatorsoverlay
+        camera.remove_overlay(indicatorsoverlay)
+        indicatorsoverlay=camera.add_overlay(indicatorsIM.tobytes(), layer=4)
         statusbutton.wait_for_release()
     
 def SerielOverlay():
+    global DataToDisplay
     #if ser.in_waiting > 0:
     #collects data from serial into a dict 
     ending = bytes('}', 'utf-8')
@@ -159,20 +171,17 @@ def SerielOverlay():
         #movingIM.paste(WarningIM,[int(linegap*2),int(screenY-2*linegap)])
     if DataToDisplay['battery'] == True: 
         movingIM.paste(BatteryIM,[int(linegap*4),int(screenY-2*linegap)]) 
+    
     #update the overlay with the new image
+    global movingoverlay
+    #camera.remove_overlay(movingoverlay)
+    #movingoverlay = camera.add_overlay(movingIM.tobytes(),layer = 4)
     movingoverlay.update(movingIM.tobytes())
 
-#Start Show
-camera.start_preview()
-#adding stationary and initial status overlays
-stationaryoverlay = camera.add_overlay(pitchYawAxisIM.tobytes(),layer=3) 
-movingoverlay = camera.add_overlay(movingIM.tobytes(),layer = 4)    
-indicatorsoverlay = camera.add_overlay(indicatorsIM.tobytes(), layer=4)
-timeoverlay = camera.add_overlay(timeIM.tobytes(), layer=4)
 
 while True: 
     #check status on of the button
-    SwitchStatus(DataToButton)
+    SwitchStatus()
     SerielOverlay()
 
 

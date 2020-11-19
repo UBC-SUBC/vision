@@ -1,17 +1,18 @@
 #include <ArduinoJson.h>
 
 void setup() {
-  Serial.begin(9600);
+
 }
-int pitch = -20;
+
+void loop() {
+    int pitch = -20;
   int yaw = -60;
   int pitchD=5;
   int yawD=5;
+  Serial.begin(9600);
+  DynamicJsonDocument root(1024);
   
-void loop() {
-  DynamicJsonBuffer jBuffer;
-  JsonObject& root = jBuffer.createObject();
-
+while(1){
   if(pitch >20 || pitch <-20){
     pitchD*=-1;   
   }
@@ -28,7 +29,8 @@ void loop() {
   root["speed"] = random(0,5);
   root["depth"] = random(0,5);
   root["battery"] = true;
- 
-  root.printTo(Serial);
+  
+  serializeJson(root, Serial);
   delay(1000);
+}
 }
