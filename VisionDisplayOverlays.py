@@ -139,27 +139,41 @@ def SwitchStatus(DataToButton):
         statusbutton.wait_for_release()
 
 
-def SerielOverlay():
+def SerialOverlay():
     # if ser.in_waiting > 0:
     # collects data from serial into a dict
 
     # ending = bytes('}', 'utf-8')
+
+    # Initializing variables
+    ValuesText = ""
+    pitchAjust = 0.0
+    yawAjust = 0.0
+
+    global DataToDisplay
 
     flag = 0
     while flag < 1:
         line = ser.read_until(ending)
         try:
             DataToDisplay = json.loads(line)
+            # configure data Values to display
+            ValuesText = "RPM:" + str(DataToDisplay['rpm']) + " rpm    Speed:" + str(
+                DataToDisplay['speed']) + " m/s     Depth:" + str(DataToDisplay['depth']) + "m"
+            pitchAjust = (DataToDisplay['pitch'] + pitchRange) / (pitchRange * 2)
+            yawAjust = (DataToDisplay['yaw'] + yawRange) / (yawRange * 2)
             flag = 1
         except:
             print("skipped json, unable to load")
-    print(flag)
-    print("i got here")
+
+    print("i got here " + str(flag))
+
+
     # configure data Values to display
-    ValuesText = "RPM:" + str(DataToDisplay['rpm']) + " rpm    Speed:" + str(
-        DataToDisplay['speed']) + " m/s     Depth:" + str(DataToDisplay['depth']) + "m"
-    pitchAjust = (DataToDisplay['pitch'] + pitchRange) / (pitchRange * 2)
-    yawAjust = (DataToDisplay['yaw'] + yawRange) / (yawRange * 2)
+    # ValuesText = "RPM:" + str(DataToDisplay['rpm']) + " rpm    Speed:" + str(
+    #     DataToDisplay['speed']) + " m/s     Depth:" + str(DataToDisplay['depth']) + "m"
+    # pitchAjust = (DataToDisplay['pitch'] + pitchRange) / (pitchRange * 2)
+    # yawAjust = (DataToDisplay['yaw'] + yawRange) / (yawRange * 2)
 
     # creating changing data images for serial canvas
     movingIM = blankcanvas.copy()
@@ -187,10 +201,10 @@ camera.start_preview()
 stationaryoverlay = camera.add_overlay(pitchYawAxisIM.tobytes(), layer=3)
 movingoverlay = camera.add_overlay(movingIM.tobytes(), layer=4)
 indicatorsoverlay = camera.add_overlay(indicatorsIM.tobytes(), layer=4)
-timeoverlay = camera.add_overlay(timeIM.tobytes(), layer=4)
+# timeoverlay = camera.add_overlay(timeIM.tobytes(), layer=4)
 
 while True:
     # check status on of the button
     SwitchStatus(DataToButton)
-    SerielOverlay()
+    SerialOverlay()
     sleep(1)
