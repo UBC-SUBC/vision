@@ -151,7 +151,25 @@ def SwitchStatus():
 def SerielOverlay():
     global DataToDisplay
     #if ser.in_waiting > 0:
-    #collects data from serial into a dict 
+    #collects data from serial into a dict
+    
+    flag = 0
+    while flag < 1:
+        line = ser.read_until(ending)
+        try:
+            DataToDisplay = json.loads(line)
+            # configure data Values to display
+            ValuesText = "RPM:" + str(DataToDisplay['rpm']) + " rpm    Speed:" + str(
+                DataToDisplay['speed']) + " m/s     Depth:" + str(DataToDisplay['depth']) + "m"
+            pitchAjust = (DataToDisplay['pitch'] + pitchRange) / (pitchRange * 2)
+            yawAjust = (DataToDisplay['yaw'] + yawRange) / (yawRange * 2)
+            flag = 1
+        except:
+        
+            print("skipped json, unable to load")
+            
+
+    
     ending = bytes('}', 'utf-8')
     line = ser.read_until(ending).decode('utf-8')
     DataToDisplay = json.loads(line)

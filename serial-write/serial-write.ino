@@ -31,6 +31,6 @@ while(1){
   root["battery"] = true;
   
   serializeJson(root, Serial);
-  delay(1000);
+  //delay(1000);
 }
 }
