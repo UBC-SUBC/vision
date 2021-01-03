@@ -103,6 +103,7 @@ draw.text([screenX - linegap * 2, linegap * 2], str(pitchRange), font=smalltextf
 draw.text([screenX - linegap * 2, screenY - linegap * 2], "-" + str(pitchRange), font=smalltextfont, fill=barcolor)
 
 # creating blank overlays for updating overlays
+global movingIM
 movingIM = blankcanvas.copy()
 indicatorsIM = blankcanvas.copy()
 timeIM = blankcanvas.copy()
@@ -110,10 +111,10 @@ timeIM = blankcanvas.copy()
 # Start Show
 camera.start_preview()
 # adding stationary and initial status overlays
-stationaryoverlay = camera.add_overlay(pitchYawAxisIM.tobytes(), layer=3)
+# stationaryoverlay = camera.add_overlay(pitchYawAxisIM.tobytes(), layer=3)
 movingoverlay = camera.add_overlay(movingIM.tobytes(), layer=4)
-indicatorsoverlay = camera.add_overlay(indicatorsIM.tobytes(), layer=4)
-timeoverlay = camera.add_overlay(timeIM.tobytes(), layer=4)
+# indicatorsoverlay = camera.add_overlay(indicatorsIM.tobytes(), layer=4)
+# timeoverlay = camera.add_overlay(timeIM.tobytes(), layer=4)
 
 
 
@@ -139,6 +140,8 @@ def readSerialData():
 
 
 def displayMovingDisplay(dataLine):
+
+
 	# configure data Values to display
 	ValuesText = "RPM:" + str(dataLine.rpm) + " rpm    Speed:" + str(
 		dataLine.speed) + " m/s     Depth:" + str(dataLine.depth) + "m"
@@ -146,7 +149,7 @@ def displayMovingDisplay(dataLine):
 	yawAjust = (dataLine.yaw + yawRange) / (yawRange * 2)
 
 	# creating changing data images for serial canvas
-	movingIM = blankcanvas.copy()
+	movingIM = Image.new('RGBA', (screenX, screenY))
 	draw = ImageDraw.Draw(movingIM)
 	draw.line([yawAjust * screenX, linegap * 0.5, yawAjust * screenX, linegap * 1.5], fill=slidercolor,
 			  width=sliderwidth)
@@ -159,14 +162,22 @@ def displayMovingDisplay(dataLine):
 		movingIM.paste(BatteryIM, [int(linegap * 4), int(screenY - 2 * linegap)])
 
 	# update the overlay with the new image
-	global movingoverlay
-	# camera.remove_overlay(movingoverlay)
-	# movingoverlay = camera.add_overlay(movingIM.tobytes(),layer = 4)
-	movingoverlay.update(movingIM.tobytes())
 
+	global movingoverlay
+
+	# camera.remove_overlay(movingoverlay)
+	movingoverlay = camera.add_overlay(movingIM.tobytes(),layer = 4)
+	sleep(0.05)
+	# movingoverlay.update(movingIM.tobytes())
+
+
+print(camera._overlays[0])
+print(movingoverlay)
 
 
 while True:
+	# global movingIM
+	camera.remove_overlay(movingoverlay)
 	dataLine = DataLine(jsonLine)
 	# print(dataLine.__dict__)
 	while True:
