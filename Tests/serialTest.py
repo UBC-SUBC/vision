@@ -32,7 +32,11 @@ while True:
         try:
             jsonLine = json.loads(line)
             print(jsonLine)
-            dataLine = DataLine(jsonLine)
+            try:
+                dataLine = DataLine(jsonLine)
+            except KeyError:
+                print("KeyError", "Dictionary key incorrect from serial data")
+            print(dataLine.__dict__)
 
             # configure data Values to display
             # ValuesText = "RPM:" + str(DataToDisplay['rpm']) + " rpm    Speed:" + str(
