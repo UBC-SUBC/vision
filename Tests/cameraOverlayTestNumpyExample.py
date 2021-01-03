@@ -29,10 +29,16 @@ screenY = int(720)
 blankcanvas = Image.new('RGBA',(screenX,screenY), (255,255,255,50))
 pitchYawAxisIM = blankcanvas
 draw = ImageDraw.Draw(pitchYawAxisIM)
-draw.rectangle([0,0,screenX,2*2.5],fill=background)
+draw.rectangle((40,40,screenX-2*20,20),fill='blue')
+draw.rectangle((screenX-2*40,40,screenX-2*20,600),fill='blue')
+draw.ellipse((20, 20, 180, 180), fill = background, outline ='blue', width = 3)
+draw.ellipse((20, 20, 180, 180), fill = background, outline ='blue')
 draw.ellipse((20, 20, 180, 180), fill = background, outline ='blue', width = 3)
 draw.ellipse((20, 20, 180, 180), fill = background, outline ='blue')
 
+# (x0, y0, x1, y1)
+# where (x0, y0) is the top-left bound of the box
+# and (x1, y1) is the lower-right bound of the box.
 stationaryoverlay = camera.add_overlay(pitchYawAxisIM.tobytes(),layer=5, format='rgba')
 
 

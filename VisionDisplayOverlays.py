@@ -19,8 +19,8 @@ serialPiPort = '/dev/ttyACM0'
 imagePath = "/home/pi/Desktop/vision/"  # images path on pi
 
 #setup display variables
-screenX =  int(800)
-screenY =  int(480) #camera is also recording at this res
+screenX =  int(1280)
+screenY =  int(720) #camera is also recording at this res
 screenFramrate = 30
 linegap = int(0.04 * screenY)
 linewidth = int(0.01 * screenY)
