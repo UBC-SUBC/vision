@@ -30,7 +30,7 @@ slidercolor = (153, 102, 255, 230)
 background = (0, 0, 0, 80)
 yawRange = int(90)
 pitchRange = int(30)
-buttonpin = 2
+buttonPinNum = 2  # GPIO 2, PIN 3
 
 # initial data values (pre serial)
 jsonLine = {'yaw': 20, 'pitch': 10, 'rpm': '100', 'speed': '2', 'depth': '2.5', 'battery': True}
@@ -59,7 +59,7 @@ print("Serial Setup")
 ending = bytes('}', 'utf-8')
 ser = serial.Serial(
 	port='/dev/ttyACM0',
-	baudrate=9600,
+	baudrate=9600
 	#    parity=serial.PARITY_NONE,
 	#    stopbits=serial.STOPBITS_ONE,
 	#    bytesize=serial.EIGHTBITS,
@@ -170,10 +170,45 @@ def paintMovingDisplay(dataLine):
 # Previous .update method
 # movingOverlay.update(movingIM.tobytes())
 
+# Button Setup
+buttonStatus = Button(buttonPinNum)
+
+# Record
+
+SAVE_FILE_PATH = '/media/usb3/recordedOverlayVideos'
+
+
+def cameraRecordStart():
+	create_directory()
+	camera.start_recording(SAVE_FILE_PATH + "/Video.h264")
+
+
+def cameraRecordStopAndSave():
+	camera.stop_recording()
+
+
+def create_directory():
+	PATH = SAVE_FILE_PATH
+
+	if os.path.exists(PATH):
+		print("File directory exists")
+	else:
+		print("File director does not exist, Attempting to create directory")
+		try:
+			os.mkdir(PATH)
+		except OSError:
+			print("Creation of the directory %s failed" % PATH)
+		else:
+			print("Successfully created the directory %s " % PATH)
+
 
 print("Start Serial Read")
 camera.start_preview()
 paintStationaryOverlay()
+
+
+cameraRecordStart()
+
 movingOverlayPrev = None
 while True:
 	# Grabs the static json
@@ -191,3 +226,10 @@ while True:
 	print(dataLine.__dict__)
 
 	paintMovingDisplay(dataLine)
+
+	print("Button Status is: ", buttonStatus.value)
+	if buttonStatus.value == 1:
+		print("button pressed")
+
+		cameraRecordStopAndSave()
+		break

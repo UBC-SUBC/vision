@@ -13,7 +13,7 @@ camera = PiCamera()
 def create_directory():
     PATH = SAVE_FILE_PATH
 
-    if os.path.isfile(PATH):
+    if os.path.exists(PATH):
         print("File directory exists")
     else:
         print("File director does not exist, Attempting to create directory")
