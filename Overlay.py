@@ -206,13 +206,12 @@ print("Start Serial Read")
 camera.start_preview()
 paintStationaryOverlay()
 
-
 cameraRecordStart()
 
 movingOverlayPrev = None
+# Grabs the static json
+dataLine = DataLine(jsonLine)
 while True:
-	# Grabs the static json
-	dataLine = DataLine(jsonLine)
 
 	while True:
 		try:
@@ -224,7 +223,9 @@ while True:
 			print("AttributeError")
 	# print to check values of each line
 	print(dataLine.__dict__)
-
+	textString = dataLine.__dict__
+	print(str(textString))
+	camera.annotate_text = str(textString)
 	paintMovingDisplay(dataLine)
 
 	print("Button Status is: ", buttonStatus.value)
