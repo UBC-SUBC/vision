@@ -164,20 +164,39 @@ def displayMovingDisplay(dataLine):
 	# update the overlay with the new image
 
 	global movingoverlay
+	global movingoverlayPrev
 
 	# camera.remove_overlay(movingoverlay)
+	# try:
+	# 	camera.remove_overlay(movingoverlayPrev)
+	# except:
+	# 	print("No previous moving overlay")
+
+	# print(movingoverlayPrev)
+
+
 	movingoverlay = camera.add_overlay(movingIM.tobytes(),layer = 4)
-	sleep(0.05)
+	if movingoverlayPrev is None:
+		print("Prev is None")
+	else:
+		camera.remove_overlay(movingoverlayPrev)
+	movingoverlayPrev = movingoverlay
+	# sleep(0.005)
 	# movingoverlay.update(movingIM.tobytes())
 
 
 print(camera._overlays[0])
 print(movingoverlay)
 
+movingoverlayPrev = None
+
 
 while True:
 	# global movingIM
-	camera.remove_overlay(movingoverlay)
+
+
+
+	# camera.remove_overlay(movingoverlay)
 	dataLine = DataLine(jsonLine)
 	# print(dataLine.__dict__)
 	while True:
