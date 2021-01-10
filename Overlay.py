@@ -57,7 +57,6 @@ class DataLine:
 
 print("Serial Setup")
 ending = bytes('}', 'utf-8')
-# serial setup
 ser = serial.Serial(
 	port='/dev/ttyACM0',
 	baudrate=9600,
@@ -68,7 +67,8 @@ ser = serial.Serial(
 )
 
 # creating blank image canvas and fonts data
-blankcanvas = Image.new('RGBA', (screenX, screenY))
+blankCanvas = Image.new('RGBA', (screenX, screenY))
+
 datafont = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf", 20)
 smalltextfont = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf", 8)
 
@@ -82,45 +82,34 @@ RaceIM = RaceIM.resize([linegap * 2, linegap * 2])
 lightsIM = Image.open(imagePath + "highbeams.png")
 lightsIM = lightsIM.resize([linegap * 2, linegap * 2])
 
-# creating stationary image for bars and backgroungs
-pitchYawAxisIM = blankcanvas.copy()
-draw = ImageDraw.Draw(pitchYawAxisIM)
-draw.rectangle([0, 0, screenX, linegap * 2.5], fill=background)
-draw.rectangle([screenX - linegap * 2.5, 0, screenX, screenY], fill=background)
-draw.rectangle([screenX * 0, screenY - linegap * 2, screenX * 1, screenY], fill=background)
-draw.line([linegap + lineextra, linegap, screenX - (linegap + lineextra), linegap], fill=barcolor, width=linewidth)
-draw.line([screenX - (linegap), linegap + lineextra, screenX - (linegap), screenY - linegap - lineextra], fill=barcolor,
-		  width=linewidth)
-draw.line([screenX / 2, linegap * 0.5, screenX / 2, linegap * 1.5], fill=barcolor, width=linewidth)
-draw.line([screenX - linegap * 1.5, screenY / 2, screenX - linegap * 0.5, screenY / 2], fill=barcolor, width=linewidth)
-draw.text([screenX * 0.5 - 8 * 1, linegap * 2], "yaw", fill=barcolor, font=smalltextfont)
-draw.text([screenX - linegap * 2, screenY * 0.5 - 9 * 2], "p", font=smalltextfont, fill=barcolor)
-draw.text([screenX - linegap * 2, screenY * 0.5 - 9 * 1], "i", font=smalltextfont, fill=barcolor)
-draw.text([screenX - linegap * 2, screenY * 0.5], "t", font=smalltextfont, fill=barcolor)
-draw.text([screenX - linegap * 2, screenY * 0.5 + 9], "c", font=smalltextfont, fill=barcolor)
-draw.text([screenX - linegap * 2, screenY * 0.5 + 9 * 2], "h", font=smalltextfont, fill=barcolor)
-draw.text([screenX - linegap * 2, linegap * 2], str(pitchRange), font=smalltextfont, fill=barcolor)
-draw.text([screenX - linegap * 2, screenY - linegap * 2], "-" + str(pitchRange), font=smalltextfont, fill=barcolor)
 
-# creating blank overlays for updating overlays
-global movingIM
-movingIM = blankcanvas.copy()
-indicatorsIM = blankcanvas.copy()
-timeIM = blankcanvas.copy()
+# Effect: Create stationary image for bars/backgrounds on overlay then adds overlay to camera
+def paintStationaryOverlay():
+	pitchYawAxisIM = Image.new('RGBA', (screenX, screenY))
+	draw = ImageDraw.Draw(pitchYawAxisIM)
+	draw.rectangle([0, 0, screenX, linegap * 2.5], fill=background)
+	draw.rectangle([screenX - linegap * 2.5, 0, screenX, screenY], fill=background)
+	draw.rectangle([screenX * 0, screenY - linegap * 2, screenX * 1, screenY], fill=background)
+	draw.line([linegap + lineextra, linegap, screenX - (linegap + lineextra), linegap], fill=barcolor, width=linewidth)
+	draw.line([screenX - (linegap), linegap + lineextra, screenX - (linegap), screenY - linegap - lineextra],
+			  fill=barcolor, width=linewidth)
+	draw.line([screenX / 2, linegap * 0.5, screenX / 2, linegap * 1.5], fill=barcolor, width=linewidth)
+	draw.line([screenX - linegap * 1.5, screenY / 2, screenX - linegap * 0.5, screenY / 2], fill=barcolor,
+			  width=linewidth)
+	draw.text([screenX * 0.5 - 8 * 1, linegap * 2], "yaw", fill=barcolor, font=smalltextfont)
+	draw.text([screenX - linegap * 2, screenY * 0.5 - 9 * 2], "p", font=smalltextfont, fill=barcolor)
+	draw.text([screenX - linegap * 2, screenY * 0.5 - 9 * 1], "i", font=smalltextfont, fill=barcolor)
+	draw.text([screenX - linegap * 2, screenY * 0.5], "t", font=smalltextfont, fill=barcolor)
+	draw.text([screenX - linegap * 2, screenY * 0.5 + 9], "c", font=smalltextfont, fill=barcolor)
+	draw.text([screenX - linegap * 2, screenY * 0.5 + 9 * 2], "h", font=smalltextfont, fill=barcolor)
+	draw.text([screenX - linegap * 2, linegap * 2], str(pitchRange), font=smalltextfont, fill=barcolor)
+	draw.text([screenX - linegap * 2, screenY - linegap * 2], "-" + str(pitchRange), font=smalltextfont, fill=barcolor)
 
-# Start Show
-camera.start_preview()
-# adding stationary and initial status overlays
-# stationaryoverlay = camera.add_overlay(pitchYawAxisIM.tobytes(), layer=3)
-movingoverlay = camera.add_overlay(movingIM.tobytes(), layer=4)
-# indicatorsoverlay = camera.add_overlay(indicatorsIM.tobytes(), layer=4)
-# timeoverlay = camera.add_overlay(timeIM.tobytes(), layer=4)
+	camera.add_overlay(pitchYawAxisIM.tobytes(), layer=3)
 
 
-
-# Purpose: Reads serial data and returns a class object of the data
+# Effect: Reads serial data and returns a python class object of the data
 def readSerialData():
-
 	ending = bytes('}', 'utf-8')
 	line = ser.read_until(ending)
 	try:
@@ -139,9 +128,8 @@ def readSerialData():
 		print("UnicodeDecodeError")
 
 
-def displayMovingDisplay(dataLine):
-
-
+# Effect: Creates moving indicators on bars on overlay then adds overlay to camera
+def paintMovingDisplay(dataLine):
 	# configure data Values to display
 	ValuesText = "RPM:" + str(dataLine.rpm) + " rpm    Speed:" + str(
 		dataLine.speed) + " m/s     Depth:" + str(dataLine.depth) + "m"
@@ -163,42 +151,34 @@ def displayMovingDisplay(dataLine):
 
 	# update the overlay with the new image
 
-	global movingoverlay
-	global movingoverlayPrev
+	global movingOverlay
+	global movingOverlayPrev
 
-	# camera.remove_overlay(movingoverlay)
-	# try:
-	# 	camera.remove_overlay(movingoverlayPrev)
-	# except:
-	# 	print("No previous moving overlay")
+	# 1. New overlay is added and reference is held
+	movingOverlay = camera.add_overlay(movingIM.tobytes(), layer=4)
 
-	# print(movingoverlayPrev)
-
-
-	movingoverlay = camera.add_overlay(movingIM.tobytes(),layer = 4)
-	if movingoverlayPrev is None:
+	# 2. Previous overlay is removed
+	if movingOverlayPrev is None:
 		print("Prev is None")
 	else:
-		camera.remove_overlay(movingoverlayPrev)
-	movingoverlayPrev = movingoverlay
-	# sleep(0.005)
-	# movingoverlay.update(movingIM.tobytes())
+		camera.remove_overlay(movingOverlayPrev)
+
+	# 3. Current overlay is set as the Previous overlay
+	movingOverlayPrev = movingOverlay
 
 
-print(camera._overlays[0])
-print(movingoverlay)
-
-movingoverlayPrev = None
+# Previous .update method
+# movingOverlay.update(movingIM.tobytes())
 
 
+print("Start Serial Read")
+camera.start_preview()
+paintStationaryOverlay()
+movingOverlayPrev = None
 while True:
-	# global movingIM
-
-
-
-	# camera.remove_overlay(movingoverlay)
+	# Grabs the static json
 	dataLine = DataLine(jsonLine)
-	# print(dataLine.__dict__)
+
 	while True:
 		try:
 			dataLine = readSerialData()
@@ -207,7 +187,7 @@ while True:
 			break
 		except AttributeError:
 			print("AttributeError")
-
+	# print to check values of each line
 	print(dataLine.__dict__)
 
-	displayMovingDisplay(dataLine)
+	paintMovingDisplay(dataLine)
